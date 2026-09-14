@@ -1,0 +1,19 @@
+{% comment %}
+  Botão de ação. Uso:
+    {% include "emails/apollo/_botao.html" with url=abs_url texto="Aceitar convite" %}
+
+  É uma <table> de uma célula, e não um <a> com padding, porque o Outlook
+  ignora padding em link e o botão viraria texto solto. O <a> é display:block
+  DENTRO da célula colorida: assim a área clicável cobre o botão inteiro, não
+  só as letras.
+{% endcomment %}<tr>
+<td align="left" style="padding-bottom:24px;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td align="center" bgcolor="#2fe68c" style="background-color:#2fe68c; border-radius:8px;">
+<a href="{{ url }}" style="display:block; padding:14px 32px; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:20px; mso-line-height-rule:exactly; font-weight:bold; color:#0c2b1a; text-decoration:none; border-radius:8px;">{{ texto }}</a>
+</td>
+</tr>
+</table>
+</td>
+</tr>

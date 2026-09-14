@@ -1,0 +1,81 @@
+{% comment %}
+  Casca dos e-mails do ApolloPlan (14/set/2026).
+
+  Vem do desenho que o Leonardo fez para o ApolloAuth: mesmo fundo, mesmo card,
+  mesmo verde, mesmo botão. Quem recebe um e-mail do Plan e um do Auth tem de
+  reconhecer a mesma casa — por isso a casca é UMA e os modelos só preenchem os
+  blocos, em vez de cada um repetir o cabeçalho.
+
+  Blocos que os filhos preenchem:
+    preheader  — o trecho que a caixa de entrada mostra ao lado do assunto.
+                 Sem ele, o cliente inventa: mostra o alt da logo ou o começo
+                 do menu. É a segunda linha mais lida do e-mail.
+    titulo     — o <title> do documento
+    saudacao   — a linha grande dentro do card
+    conteudo   — o corpo (parágrafos, botão, o que for)
+    aviso      — nota pequena ABAIXO do card (prazo, expiração)
+    rodape     — a linha que explica por que a pessoa recebeu isto
+
+  Por que <table> aninhada e CSS em cada célula: cliente de e-mail não é
+  navegador. O Outlook renderiza com o motor do Word (sem flex, sem grid) e o
+  Gmail descarta a maior parte do CSS de <head>.
+
+  ⚠️ A logo é URL absoluta e pública, não `{{ current_site }}/static/...`: o
+  static do Plane só publica arquivo novo ao reiniciar, e imagem de e-mail não
+  pode depender de deploy. Ela mora junto das outras imagens de e-mail, no
+  volume /media do Authentik. Cliente que bloqueia imagem remota — a maioria,
+  por padrão — mostra o alt, por isso o alt diz "ApolloPlan".
+{% endcomment %}<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>{% block titulo %}ApolloPlan{% endblock %}</title>
+<!--[if mso]>
+<style type="text/css">
+table {border-collapse:collapse;}
+td, a, span {font-family: Arial, Helvetica, sans-serif !important;}
+</style>
+<![endif]-->
+</head>
+<body style="margin:0; padding:0; background-color:#0f1512;" bgcolor="#0f1512">
+<span style="display:none; font-size:1px; color:#0f1512; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden;">{% block preheader %}{% endblock %}</span>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#0f1512;" bgcolor="#0f1512">
+<tr>
+<td align="center" style="padding:32px 16px;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px; max-width:600px;">
+<!-- Logo -->
+<tr>
+<td align="left" style="padding:0 8px 20px 8px;">
+<img src="https://app.apolloauth.com.br/media/public/branding/apolloplan-lockup-branco.png" alt="ApolloPlan" width="168" style="display:block; width:168px; height:auto; border:0;">
+</td>
+</tr>
+<!-- Card -->
+<tr>
+<td style="background-color:#1a221d; border-radius:12px; padding:40px 40px 36px 40px;" bgcolor="#1a221d">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+<tr>
+<td style="font-family:Arial, Helvetica, sans-serif; font-size:22px; line-height:28px; mso-line-height-rule:exactly; color:#f2f7f4; font-weight:bold; padding-bottom:16px;">
+{% block saudacao %}{% endblock %}
+</td>
+</tr>
+{% block conteudo %}{% endblock %}
+</table>
+</td>
+</tr>
+{% block aviso %}{% endblock %}
+<!-- Rodapé -->
+<tr>
+<td style="padding:24px 8px 0 8px; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:18px; mso-line-height-rule:exactly; color:#7d8781;">
+ApolloPlan · Apollo Solution<br>
+{% block rodape %}{% endblock %}
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>
