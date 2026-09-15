@@ -213,13 +213,14 @@ def send_webhook_deactivation_email(webhook_id: str, receiver_id: str, current_s
         webhook = Webhook.objects.get(pk=webhook_id)
 
         # Get the webhook payload
-        subject = "Webhook Deactivated"
+        subject = "ApolloPlan — webhook desativado"
         message = f"Webhook {webhook.url} has been deactivated due to failed requests."
 
         # Send the mail
         context = {
             "email": receiver.email,
             "message": message,
+            "endereco": webhook.url,
             "webhook_url": f"{current_site}/{str(webhook.workspace.slug)}/settings/webhooks/{str(webhook.id)}",
         }
         html_content = render_to_string("emails/notifications/webhook-deactivate.html", context)
