@@ -1,6 +1,30 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
-<html>
-    <p>This is a test email sent to verify if email configuration is working as expected in your Apollo instance.</p>
+{% extends "emails/apollo/base.html" %}
+{% comment %}
+  E-mail de teste do painel de administração do ApolloPlan ("enviar e-mail de
+  teste"). Sem variável nenhuma.
 
-<p>Regards,</br> Equipe Apollo </p>
-</html>
+  Reescrito em 15/set/2026. O original tinha 285 bytes de texto solto, sem
+  marca — e é justamente o e-mail que se usa para conferir se o envio funciona:
+  se ele chega torto, quem testa não sabe se o problema é a configuração ou o
+  modelo. Agora ele prova as duas coisas de uma vez, porque passa pela mesma
+  casca dos demais: se a logo aparece e o layout está certo, o caminho inteiro
+  está de pé.
+{% endcomment %}
+{% block titulo %}Teste de envio do ApolloPlan{% endblock %}
+{% block preheader %}Se você recebeu esta mensagem, o envio de e-mail está funcionando.{% endblock %}
+{% block saudacao %}Teste de envio{% endblock %}
+
+{% block conteudo %}
+<tr>
+<td style="font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:24px; mso-line-height-rule:exactly; color:#c3cdc7; padding-bottom:24px;">
+Esta é uma mensagem de teste, enviada pelo painel de administração para conferir a configuração de e‑mail do ApolloPlan.
+</td>
+</tr>
+<tr>
+<td style="font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:24px; mso-line-height-rule:exactly; color:#c3cdc7;">
+<strong style="color:#f2f7f4;">Se você está lendo isto, está funcionando</strong> — e, como esta mensagem usa o mesmo modelo dos demais e‑mails, o layout acima também confirma que a parte visual está correta.
+</td>
+</tr>
+{% endblock %}
+
+{% block rodape %}Você recebeu este e‑mail porque alguém disparou um teste de configuração no ApolloPlan.{% endblock %}
