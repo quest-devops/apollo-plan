@@ -10,6 +10,7 @@ import { observer } from "mobx-react";
 import type { ISearchIssueResponse, TIssue } from "@plane/types";
 // components
 import { IssueModalContext } from "@/components/issues/issue-modal/context";
+import type { TPendingRelation } from "@/components/issues/issue-modal/context";
 // hooks
 import { useUser } from "@/hooks/store/user/user-user";
 
@@ -24,6 +25,7 @@ export const IssueModalProvider = observer(function IssueModalProvider(props: TI
   const { children, allowedProjectIds } = props;
   // states
   const [selectedParentIssue, setSelectedParentIssue] = useState<ISearchIssueResponse | null>(null);
+  const [pendingRelations, setPendingRelations] = useState<TPendingRelation[]>([]);
   // store hooks
   const { projectsWithCreatePermissions } = useUser();
   // derived values
@@ -51,6 +53,8 @@ export const IssueModalProvider = observer(function IssueModalProvider(props: TI
         handleTemplateChange: () => Promise.resolve(),
         handleConvert: () => Promise.resolve(),
         handleCreateSubWorkItem: () => Promise.resolve(),
+        pendingRelations,
+        setPendingRelations,
       }}
     >
       {children}

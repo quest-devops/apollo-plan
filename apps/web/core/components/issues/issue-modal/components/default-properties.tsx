@@ -26,6 +26,7 @@ import { PriorityDropdown } from "@/components/dropdowns/priority";
 import { StateDropdown } from "@/components/dropdowns/state/dropdown";
 import { ParentIssuesListModal } from "@/components/issues/parent-issues-list-modal";
 import { IssueLabelSelect } from "@/components/issues/select";
+import { IssueModalRelationsSelect } from "./relations-select";
 // helpers
 // hooks
 import { useProjectEstimates } from "@/hooks/store/estimates";
@@ -338,6 +339,9 @@ export const IssueDefaultProperties = observer(function IssueDefaultProperties(p
           />
         )}
       />
+      {/* Apollo: só na CRIAÇÃO (na edição, a tela do item já tem o painel de relações)
+          e fora de rascunho (rascunho não é item ainda, não aceita relação) */}
+      {!id && !isDraft && <IssueModalRelationsSelect workspaceSlug={workspaceSlug} projectId={projectId} />}
     </div>
   );
 });

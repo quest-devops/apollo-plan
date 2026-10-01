@@ -37,6 +37,8 @@ type Props = {
   searchParams: Partial<TProjectIssuesSearchParams>;
   handleOnSubmit: (data: ISearchIssueResponse[]) => Promise<void>;
   workspaceLevelToggle?: boolean;
+  // Apollo: abrir a busca já no workspace inteiro (relações entre projetos/setores)
+  defaultWorkspaceLevel?: boolean;
   shouldHideIssue?: (issue: ISearchIssueResponse) => boolean;
   selectedWorkItemIds?: string[];
   workItemSearchServiceCallback?: (params: TProjectIssuesSearchParams) => Promise<ISearchIssueResponse[]>;
@@ -55,6 +57,7 @@ export function ExistingIssuesListModal(props: Props) {
     searchParams,
     handleOnSubmit,
     workspaceLevelToggle = false,
+    defaultWorkspaceLevel = false,
     shouldHideIssue,
     selectedWorkItemIds,
     workItemSearchServiceCallback,
@@ -66,7 +69,7 @@ export function ExistingIssuesListModal(props: Props) {
   const [selectedIssues, setSelectedIssues] = useState<ISearchIssueResponse[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isWorkspaceLevel, setIsWorkspaceLevel] = useState(false);
+  const [isWorkspaceLevel, setIsWorkspaceLevel] = useState(defaultWorkspaceLevel);
   const { isMobile } = usePlatformOS();
   const debouncedSearchTerm: string = useDebounce(searchTerm, 500);
   const { baseTabIndex } = getTabIndex(undefined, isMobile);

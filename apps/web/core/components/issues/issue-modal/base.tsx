@@ -11,7 +11,7 @@ import { useParams } from "next/navigation";
 // Plane imports
 import { useTranslation } from "@plane/i18n";
 import { TOAST_TYPE, setToast } from "@plane/propel/toast";
-import type { TBaseIssue, TIssue } from "@plane/types";
+import type { TBaseIssue, TIssue, TIssueRelationTypes } from "@plane/types";
 import { EIssuesStoreType } from "@plane/types";
 import { EModalPosition, EModalWidth, ModalCore } from "@plane/ui";
 // hooks
@@ -74,8 +74,14 @@ export const CreateUpdateIssueModalBase = observer(function CreateUpdateIssueMod
   const { issues } = useIssues(storeType);
   const { issues: projectIssues } = useIssues(EIssuesStoreType.PROJECT);
   const { issues: draftIssues } = useIssues(EIssuesStoreType.WORKSPACE_DRAFT);
-  const { fetchIssue } = useIssueDetail();
-  const { allowedProjectIds, handleCreateUpdatePropertyValues, handleCreateSubWorkItem } = useIssueModal();
+  const { fetchIssue, createRelation } = useIssueDetail();
+  const {
+    allowedProjectIds,
+    handleCreateUpdatePropertyValues,
+    handleCreateSubWorkItem,
+    pendingRelations,
+    setPendingRelations,
+  } = useIssueModal();
   const { getProjectByIdentifier } = useProject();
   // current store details
   const { createIssue, updateIssue } = useIssuesActions(storeType);
@@ -231,6 +237,27 @@ export const CreateUpdateIssueModalBase = observer(function CreateUpdateIssueMod
           projectId: response.project_id,
           parentId: response.id,
         });
+
+        // Apollo: relações escolhidas no modal (podem ser de outros projetos/setores).
+        // O item já foi criado — falha aqui vira aviso, não desfaz a criação.
+        if (!is_draft_issue && pendingRelations.length > 0) {
+          const porTipo = new Map<TIssueRelationTypes, string[]>();
+          pendingRelations.forEach(({ relationType, issue }) =>
+            porTipo.set(relationType, [...(porTipo.get(relationType) ?? []), issue.id])
+          );
+          try {
+            for (const [relationType, issueIds] of porTipo) {
+              await createRelation(workspaceSlug.toString(), response.project_id, response.id, relationType, issueIds);
+            }
+          } catch {
+            setToast({
+              type: TOAST_TYPE.WARNING,
+              title: "Item criado, mas sem as relações",
+              message: "Não foi possível gravar as relações. Adicione-as pela tela do item.",
+            });
+          }
+          setPendingRelations([]);
+        }
       }
 
       setToast({
