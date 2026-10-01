@@ -27,6 +27,7 @@ import { AuthService } from "@/services/auth.service";
 type Props = {
   email: string;
   isSMTPConfigured: boolean;
+  isMagicLoginEnabled: boolean;
   mode: EAuthModes;
   handleEmailClear: () => void;
   handleAuthStep: (step: EAuthSteps) => void;
@@ -47,7 +48,7 @@ const defaultValues: TPasswordFormValues = {
 const authService = new AuthService();
 
 export const AuthPasswordForm = observer(function AuthPasswordForm(props: Props) {
-  const { email, isSMTPConfigured, handleAuthStep, handleEmailClear, mode, nextPath } = props;
+  const { email, isSMTPConfigured, isMagicLoginEnabled, handleAuthStep, handleEmailClear, mode, nextPath } = props;
   // plane imports
   const { t } = useTranslation();
   // ref
@@ -281,15 +282,13 @@ export const AuthPasswordForm = observer(function AuthPasswordForm(props: Props)
           {mode === EAuthModes.SIGN_IN ? (
             <>
               <Button type="submit" variant="primary" className="w-full" size="xl" disabled={isButtonDisabled}>
-                {isSubmitting ? (
-                  <Spinner height="20px" width="20px" />
-                ) : isSMTPConfigured ? (
-                  t("common.continue")
-                ) : (
-                  t("common.go_to_workspace")
-                )}
+                {/* Padrão Apollo: o botão de senha diz "Entrar", como no Desk/Cloud */}
+                {isSubmitting ? <Spinner height="20px" width="20px" /> : "Entrar"}
               </Button>
-              {isSMTPConfigured && (
+              {/* Código único por e-mail só quando o login mágico está LIGADO na
+                  instância — o upstream mostrava só por ter SMTP, e o botão levava
+                  a um fluxo desligado. */}
+              {isSMTPConfigured && isMagicLoginEnabled && (
                 <Button
                   type="button"
                   data-ph-element={AUTH_TRACKER_ELEMENTS.SIGN_IN_WITH_UNIQUE_CODE}

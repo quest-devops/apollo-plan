@@ -8,6 +8,7 @@
 import { EAuthModes } from "@plane/constants";
 // components
 import { ResetPasswordForm } from "@/components/account/auth-forms/reset-password";
+import { ApolloLoginShell } from "@/components/auth-screens/apollo-login-shell";
 import { AuthHeader } from "@/components/auth-screens/header";
 // helpers
 import { EPageTypes } from "@/helpers/authentication.helper";
@@ -19,10 +20,10 @@ function SetPasswordPage() {
   return (
     <DefaultLayout>
       <AuthenticationWrapper pageType={EPageTypes.SET_PASSWORD}>
-        <div className="relative z-10 flex h-screen w-screen flex-col items-center overflow-hidden overflow-y-auto px-8 pt-6 pb-10">
+        <ApolloLoginShell>
           <AuthHeader type={EAuthModes.SIGN_IN} />
           <ResetPasswordForm />
-        </div>
+        </ApolloLoginShell>
       </AuthenticationWrapper>
     </DefaultLayout>
   );

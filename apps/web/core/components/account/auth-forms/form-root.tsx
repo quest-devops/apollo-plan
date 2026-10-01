@@ -123,6 +123,7 @@ export const AuthFormRoot = observer(function AuthFormRoot(props: TAuthFormRoot)
       <AuthPasswordForm
         mode={authMode}
         isSMTPConfigured={isSMTPConfigured}
+        isMagicLoginEnabled={config?.is_magic_login_enabled || false}
         email={email}
         handleEmailClear={handleEmailClear}
         handleAuthStep={(step: EAuthSteps) => {

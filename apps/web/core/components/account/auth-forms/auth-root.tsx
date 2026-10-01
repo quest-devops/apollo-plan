@@ -9,6 +9,10 @@ import { observer } from "mobx-react";
 import { useSearchParams } from "next/navigation";
 // plane imports
 import { OAuthOptions } from "@plane/ui";
+// components
+import { ApolloLoginRodape } from "@/components/auth-screens/apollo-login-shell";
+// assets
+import ApolloAuthIcone from "@/app/assets/auth/apollo-login/aa-icone.png?url";
 // helpers
 import type { TAuthErrorInfo } from "@/helpers/authentication.helper";
 import {
@@ -22,7 +26,6 @@ import {
 import { useOAuthConfig } from "@/hooks/oauth";
 import { useInstance } from "@/hooks/store/use-instance";
 // local imports
-import { TermsAndConditions } from "../terms-and-conditions";
 import { AuthBanner } from "./auth-banner";
 import { AuthHeader, AuthHeaderBase } from "./auth-header";
 import { AuthFormRoot } from "./form-root";
@@ -53,6 +56,12 @@ export const AuthRoot = observer(function AuthRoot(props: TAuthRoot) {
   const { isOAuthEnabled, oAuthOptions } = useOAuthConfig(oAuthActionText);
   const isEmailBasedAuthEnabled = config?.is_email_password_enabled || config?.is_magic_login_enabled;
   const noAuthMethodsAvailable = !isOAuthEnabled && !isEmailBasedAuthEnabled;
+  // Padrão Apollo: o SSO do ApolloAuth vira o botão branco abaixo do formulário,
+  // como no Desk/Mail/Cloud. Outros provedores (desligados na nossa stack)
+  // continuam no componente do upstream, caso algum dia sejam ligados.
+  const apolloOption = oAuthOptions.find((option) => option.id === "apollo" && option.enabled);
+  const otherOAuthOptions = oAuthOptions.filter((option) => option.id !== "apollo");
+  const hasOtherOAuth = otherOAuthOptions.some((option) => option.enabled);
 
   useEffect(() => {
     if (!authMode && currentAuthMode) setAuthMode(currentAuthMode);
@@ -116,7 +125,9 @@ export const AuthRoot = observer(function AuthRoot(props: TAuthRoot) {
   return (
     <AuthContainer>
       {errorInfo && errorInfo?.type === EErrorAlertType.BANNER_ALERT && (
-        <AuthBanner message={errorInfo.message} handleBannerData={(value) => setErrorInfo(value)} />
+        <div className="mb-5">
+          <AuthBanner message={errorInfo.message} handleBannerData={(value) => setErrorInfo(value)} />
+        </div>
       )}
       <AuthHeader
         workspaceSlug={workspaceSlug?.toString() || undefined}
@@ -125,13 +136,6 @@ export const AuthRoot = observer(function AuthRoot(props: TAuthRoot) {
         authMode={authMode}
         currentAuthStep={authStep}
       />
-      {isOAuthEnabled && (
-        <OAuthOptions
-          options={oAuthOptions}
-          compact={authStep === EAuthSteps.PASSWORD}
-          showDivider={isEmailBasedAuthEnabled}
-        />
-      )}
       {isEmailBasedAuthEnabled && (
         <AuthFormRoot
           authStep={authStep}
@@ -144,15 +148,30 @@ export const AuthRoot = observer(function AuthRoot(props: TAuthRoot) {
           currentAuthMode={currentAuthMode}
         />
       )}
-      <TermsAndConditions authType={authMode} />
+      {apolloOption && (
+        <>
+          {isEmailBasedAuthEnabled && (
+            <div className="alogin-divisor" aria-hidden="true">
+              ou continue com
+            </div>
+          )}
+          <button type="button" className="alogin-btn-sso" onClick={apolloOption.onClick}>
+            <img src={ApolloAuthIcone} alt="" />
+            Continuar com ApolloAuth
+          </button>
+        </>
+      )}
+      {hasOtherOAuth && (
+        <div className="mt-5">
+          <OAuthOptions options={otherOAuthOptions} compact={authStep === EAuthSteps.PASSWORD} showDivider={false} />
+        </div>
+      )}
+      <ApolloLoginRodape />
     </AuthContainer>
   );
 });
 
+// A casca (painel + coluna) vem do ApolloLoginShell; aqui só empilha o conteúdo.
 function AuthContainer({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mt-10 flex w-full flex-grow flex-col items-center justify-center py-6">
-      <div className="relative flex w-full max-w-[22.5rem] flex-col gap-6">{children}</div>
-    </div>
-  );
+  return <div className="relative flex w-full flex-col">{children}</div>;
 }

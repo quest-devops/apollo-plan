@@ -7,6 +7,7 @@
 import { observer } from "mobx-react";
 // components
 import { ForgotPasswordForm } from "@/components/account/auth-forms/forgot-password";
+import { ApolloLoginShell } from "@/components/auth-screens/apollo-login-shell";
 import { AuthHeader } from "@/components/auth-screens/header";
 // helpers
 import { EAuthModes, EPageTypes } from "@/helpers/authentication.helper";
@@ -18,10 +19,10 @@ function ForgotPasswordPage() {
   return (
     <DefaultLayout>
       <AuthenticationWrapper pageType={EPageTypes.NON_AUTHENTICATED}>
-        <div className="relative z-10 flex h-screen w-screen flex-col items-center overflow-hidden overflow-y-auto px-8 pt-6 pb-10">
+        <ApolloLoginShell>
           <AuthHeader type={EAuthModes.SIGN_IN} />
           <ForgotPasswordForm />
-        </div>
+        </ApolloLoginShell>
       </AuthenticationWrapper>
     </DefaultLayout>
   );

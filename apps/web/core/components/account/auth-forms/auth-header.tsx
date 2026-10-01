@@ -9,6 +9,7 @@ import useSWR from "swr";
 import { useTranslation } from "@plane/i18n";
 import type { IWorkspaceMemberInvitation } from "@plane/types";
 // components
+import { ApolloLoginTitulo } from "@/components/auth-screens/apollo-login-shell";
 import { LogoSpinner } from "@/components/common/logo-spinner";
 import { WorkspaceLogo } from "@/components/workspace/logo";
 // helpers
@@ -27,30 +28,30 @@ type TAuthHeader = {
 const Titles = {
   [EAuthModes.SIGN_IN]: {
     [EAuthSteps.EMAIL]: {
-      header: "Gestão inteligente.",
-      subHeader: "Bem-vindo de volta ao Apollo.",
+      header: "Entrar no ApolloPlan",
+      subHeader: "",
     },
     [EAuthSteps.PASSWORD]: {
-      header: "Gestão inteligente.",
-      subHeader: "Bem-vindo de volta ao Apollo.",
+      header: "Entrar no ApolloPlan",
+      subHeader: "",
     },
     [EAuthSteps.UNIQUE_CODE]: {
-      header: "Gestão inteligente.",
-      subHeader: "Bem-vindo de volta ao Apollo.",
+      header: "Entrar no ApolloPlan",
+      subHeader: "",
     },
   },
   [EAuthModes.SIGN_UP]: {
     [EAuthSteps.EMAIL]: {
-      header: "Gestão inteligente.",
-      subHeader: "Crie sua conta Apollo.",
+      header: "Criar conta no ApolloPlan",
+      subHeader: "",
     },
     [EAuthSteps.PASSWORD]: {
-      header: "Gestão inteligente.",
-      subHeader: "Crie sua conta Apollo.",
+      header: "Criar conta no ApolloPlan",
+      subHeader: "",
     },
     [EAuthSteps.UNIQUE_CODE]: {
-      header: "Gestão inteligente.",
-      subHeader: "Crie sua conta Apollo.",
+      header: "Criar conta no ApolloPlan",
+      subHeader: "",
     },
   },
 };
@@ -89,8 +90,8 @@ export const AuthHeader = observer(function AuthHeader(props: TAuthHeader) {
         ),
         subHeader:
           mode == EAuthModes.SIGN_UP
-            ? "Create an account to start managing work with your team."
-            : "Log in to start managing work with your team.",
+            ? "Crie sua conta para colaborar com a sua equipe."
+            : "Entre para colaborar com a sua equipe.",
       };
     }
 
@@ -114,11 +115,12 @@ type TAuthHeaderBase = {
   subHeader: string;
 };
 
+// Título no padrão Apollo (VT323 verde com brilho — estilos em apollo-login.css)
 export function AuthHeaderBase(props: TAuthHeaderBase) {
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-h1-bold text-accent-primary">{props.header}</span>
-      <span className="text-16 leading-6 font-semibold text-placeholder">{props.subHeader}</span>
-    </div>
+    <>
+      <ApolloLoginTitulo>{props.header}</ApolloLoginTitulo>
+      {props.subHeader && <p className="alogin-subtitulo">{props.subHeader}</p>}
+    </>
   );
 }
