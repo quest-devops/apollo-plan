@@ -37,6 +37,10 @@ LIMITE_POR_RODADA = 200
 
 
 def calcular_proxima(agendamento: ScheduledIssue, depois_de):
+    # "uma vez" que já executou (ou falhou ao executar) não tem próxima,
+    # mesmo que a data marcada ainda esteja no futuro
+    if agendamento.frequency == "once":
+        return None
     return proxima_execucao(
         agendamento.frequency,
         agendamento.time_of_day,
@@ -87,7 +91,9 @@ def executar_agendamento(agendamento_id) -> str | None:
     """Executa um agendamento vencido. Devolve o id do item criado (ou None)."""
     with transaction.atomic():
         agendamento = (
-            ScheduledIssue.objects.select_for_update(skip_locked=True)
+            # of=("self",): trava SÓ a linha do agendamento — o Postgres recusa
+            # FOR UPDATE no lado anulável do JOIN (created_by pode ser nulo)
+            ScheduledIssue.objects.select_for_update(skip_locked=True, of=("self",))
             .select_related("project", "created_by")
             .filter(
                 id=agendamento_id,
