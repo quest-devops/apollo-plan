@@ -29,6 +29,13 @@ class ScheduledIssue(ProjectBaseModel):
         ("monthly", "Mensal"),
     )
 
+    DUE_UNIT_CHOICES = (
+        ("day", "Dias"),
+        ("week", "Semanas"),
+        ("month", "Meses"),
+        ("year", "Anos"),
+    )
+
     # --- o item que será criado ---
     name = models.CharField(max_length=255)
     description_html = models.TextField(blank=True, default="<p></p>")
@@ -42,8 +49,11 @@ class ScheduledIssue(ProjectBaseModel):
     # etiqueta apagada) — o agendamento sobrevive a essas mudanças
     assignee_ids = ArrayField(models.UUIDField(), default=list, blank=True)
     label_ids = ArrayField(models.UUIDField(), default=list, blank=True)
-    # prazo relativo: "vence N dias depois de criado" (vazio = sem prazo)
-    due_in_days = models.PositiveSmallIntegerField(null=True, blank=True)
+    # prazo relativo: "vence N <unidade> depois de criado" (vazio = sem prazo).
+    # Mês e ano são de calendário (trimestral = 3 meses) — ver
+    # plane/utils/agendamento.somar_prazo
+    due_amount = models.PositiveSmallIntegerField(null=True, blank=True)
+    due_unit = models.CharField(max_length=10, choices=DUE_UNIT_CHOICES, default="day")
 
     # --- quando ---
     frequency = models.CharField(max_length=10, choices=FREQUENCY_CHOICES)

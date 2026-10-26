@@ -8,7 +8,7 @@
 import unittest
 from datetime import date, datetime, time, timezone
 
-from plane.utils.agendamento import proxima_execucao
+from plane.utils.agendamento import proxima_execucao, somar_prazo
 
 UTC = timezone.utc
 
@@ -78,6 +78,33 @@ class TestAgendamento(unittest.TestCase):
             proxima_execucao("once", time(9, 0), agora)
         with self.assertRaises(ValueError):
             proxima_execucao("daily", time(9, 0), datetime(2026, 10, 26))
+
+
+class TestPrazo(unittest.TestCase):
+    def test_dias_e_semanas(self):
+        self.assertEqual(somar_prazo(date(2026, 10, 26), 7, "day"), date(2026, 11, 2))
+        self.assertEqual(somar_prazo(date(2026, 10, 26), 30, "day"), date(2026, 11, 25))
+        self.assertEqual(somar_prazo(date(2026, 12, 20), 2, "week"), date(2027, 1, 3))
+
+    def test_meses_de_calendario(self):
+        # trimestral/semestral/anual = 3/6/12 meses de calendário
+        self.assertEqual(somar_prazo(date(2026, 1, 15), 3, "month"), date(2026, 4, 15))
+        self.assertEqual(somar_prazo(date(2026, 8, 31), 6, "month"), date(2027, 2, 28))
+        self.assertEqual(somar_prazo(date(2026, 1, 31), 1, "month"), date(2026, 2, 28))
+        self.assertEqual(somar_prazo(date(2027, 11, 30), 3, "month"), date(2028, 2, 29))  # bissexto
+        self.assertEqual(somar_prazo(date(2026, 10, 26), 12, "month"), date(2027, 10, 26))
+
+    def test_anos(self):
+        self.assertEqual(somar_prazo(date(2028, 2, 29), 1, "year"), date(2029, 2, 28))
+        self.assertEqual(somar_prazo(date(2026, 10, 26), 2, "year"), date(2028, 10, 26))
+
+    def test_invalidos(self):
+        with self.assertRaises(ValueError):
+            somar_prazo(date(2026, 1, 1), 1, "hora")
+        with self.assertRaises(ValueError):
+            somar_prazo(date(2026, 1, 1), 11, "year")
+        with self.assertRaises(ValueError):
+            somar_prazo(date(2026, 1, 1), -1, "day")
 
 
 if __name__ == "__main__":

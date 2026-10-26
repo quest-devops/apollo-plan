@@ -89,3 +89,31 @@ def proxima_execucao(
         raise AssertionError("inalcançável: o mês seguinte sempre serve")
 
     raise ValueError(f"frequência desconhecida: {frequencia}")
+
+
+# --- prazo (vencimento) do item criado ---------------------------------------
+
+UNIDADES_PRAZO = ("day", "week", "month", "year")
+# teto por unidade: ~10 anos em qualquer delas
+LIMITE_PRAZO = {"day": 3650, "week": 520, "month": 120, "year": 10}
+
+
+def somar_prazo(inicio: date, quantidade: int, unidade: str) -> date:
+    """Data de vencimento a partir de `inicio`.
+
+    Meses e anos são de CALENDÁRIO ("trimestral" a partir de 15/jan vence em
+    15/abr, não 90 dias depois). Dia que não existe no mês de destino cai no
+    último dia dele: 31/jan + 1 mês = 28 (ou 29)/fev; 29/fev + 1 ano = 28/fev.
+    """
+    if unidade not in UNIDADES_PRAZO:
+        raise ValueError(f"unidade de prazo desconhecida: {unidade}")
+    if quantidade < 0 or quantidade > LIMITE_PRAZO[unidade]:
+        raise ValueError("prazo fora do limite")
+    if unidade == "day":
+        return inicio + timedelta(days=quantidade)
+    if unidade == "week":
+        return inicio + timedelta(weeks=quantidade)
+    meses = quantidade if unidade == "month" else quantidade * 12
+    total = inicio.year * 12 + (inicio.month - 1) + meses
+    ano, mes = divmod(total, 12)
+    return _dia_do_mes(ano, mes + 1, inicio.day)

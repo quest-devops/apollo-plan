@@ -4,7 +4,7 @@
  * See the LICENSE file for details.
  */
 
-import type { TScheduledIssue } from "@/services/scheduled-issue.service";
+import type { TScheduledIssue, TScheduledIssueDueUnit } from "@/services/scheduled-issue.service";
 
 // 0 = segunda … 6 = domingo (mesma convenção do backend: datetime.weekday())
 export const WEEKDAYS_SHORT = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
@@ -15,6 +15,49 @@ export const FREQUENCY_LABELS: Record<TScheduledIssue["frequency"], string> = {
   daily: "Diária",
   weekly: "Semanal",
   monthly: "Mensal",
+};
+
+// ── Prazo (vencimento) ──────────────────────────────────────────────────
+export type TDuePreset = "none" | "7d" | "15d" | "30d" | "quarterly" | "semiannual" | "annual" | "custom";
+
+export const DUE_PRESETS: { key: TDuePreset; label: string; amount: number | null; unit: TScheduledIssueDueUnit }[] = [
+  { key: "none", label: "Sem prazo", amount: null, unit: "day" },
+  { key: "7d", label: "7 dias", amount: 7, unit: "day" },
+  { key: "15d", label: "15 dias", amount: 15, unit: "day" },
+  { key: "30d", label: "30 dias", amount: 30, unit: "day" },
+  { key: "quarterly", label: "Trimestral (3 meses)", amount: 3, unit: "month" },
+  { key: "semiannual", label: "Semestral (6 meses)", amount: 6, unit: "month" },
+  { key: "annual", label: "Anual (1 ano)", amount: 1, unit: "year" },
+  { key: "custom", label: "Personalizado…", amount: null, unit: "day" },
+];
+
+export const DUE_UNIT_LABELS: Record<TScheduledIssueDueUnit, [string, string]> = {
+  day: ["dia", "dias"],
+  week: ["semana", "semanas"],
+  month: ["mês", "meses"],
+  year: ["ano", "anos"],
+};
+
+// teto por unidade (~10 anos) — o mesmo do backend
+export const DUE_LIMITS: Record<TScheduledIssueDueUnit, number> = { day: 3650, week: 520, month: 120, year: 10 };
+
+/** Qual opção da lista corresponde a (quantidade, unidade); senão, personalizado. */
+export const presetFor = (amount: number | null, unit: TScheduledIssueDueUnit): TDuePreset => {
+  if (amount === null || amount === undefined) return "none";
+  if (unit === "month" && amount === 12) return "annual";
+  const found = DUE_PRESETS.find((p) => p.key !== "custom" && p.amount === amount && p.unit === unit);
+  return found ? found.key : "custom";
+};
+
+/** "30 dias", "Trimestral", "18 meses"… */
+export const describeDue = (amount: number | null, unit: TScheduledIssueDueUnit) => {
+  if (amount === null || amount === undefined) return "";
+  const preset = presetFor(amount, unit);
+  if (preset === "quarterly") return "trimestral";
+  if (preset === "semiannual") return "semestral";
+  if (preset === "annual") return "anual";
+  const [um, varios] = DUE_UNIT_LABELS[unit];
+  return `${amount} ${amount === 1 ? um : varios}`;
 };
 
 export const hhmm = (time: string | null | undefined) => (time ?? "").slice(0, 5);

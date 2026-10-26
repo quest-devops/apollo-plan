@@ -24,7 +24,7 @@ import type { TScheduledIssue, TScheduledIssueForm } from "@/services/scheduled-
 import { ScheduledIssueService } from "@/services/scheduled-issue.service";
 // local
 import { ScheduledIssueFormModal } from "./form-modal";
-import { describeSchedule, formatDateTimeBR } from "./helpers";
+import { describeDue, describeSchedule, formatDateTimeBR } from "./helpers";
 
 const service = new ScheduledIssueService();
 
@@ -178,7 +178,7 @@ export const ScheduledIssuesAutomation = observer(function ScheduledIssuesAutoma
                     <span className="text-body-xs-regular text-tertiary">
                       {state ? `Nasce em "${state.name}"` : "Nasce no estado padrão"}
                       {responsaveis ? ` · para ${responsaveis}` : ""}
-                      {item.due_in_days !== null ? ` · vence em ${item.due_in_days} dia(s)` : ""}
+                      {item.due_amount !== null ? ` · vencimento ${describeDue(item.due_amount, item.due_unit)}` : ""}
                     </span>
                     <span className="text-body-xs-regular text-tertiary">
                       {item.is_active

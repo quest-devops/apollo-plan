@@ -19,11 +19,24 @@ import { IssueLabelSelect } from "@/components/issues/select";
 // services
 import type {
   TScheduledIssue,
+  TScheduledIssueDueUnit,
   TScheduledIssueForm,
   TScheduledIssueFrequency,
 } from "@/services/scheduled-issue.service";
 // local
-import { FREQUENCY_LABELS, WEEKDAYS_SHORT, describeSchedule, hhmm, htmlToText, textToHtml } from "./helpers";
+import {
+  DUE_LIMITS,
+  DUE_PRESETS,
+  DUE_UNIT_LABELS,
+  FREQUENCY_LABELS,
+  WEEKDAYS_SHORT,
+  describeSchedule,
+  hhmm,
+  htmlToText,
+  presetFor,
+  textToHtml,
+} from "./helpers";
+import type { TDuePreset } from "./helpers";
 
 type Props = {
   isOpen: boolean;
@@ -40,7 +53,9 @@ type TFormState = {
   priority: TIssuePriorities;
   assignee_ids: string[];
   label_ids: string[];
-  due_in_days: string; // texto do campo; vazio = sem prazo
+  due_preset: TDuePreset;
+  due_amount: string; // só no personalizado
+  due_unit: TScheduledIssueDueUnit; // só no personalizado
   frequency: TScheduledIssueFrequency;
   time: string; // "HH:MM"
   weekdays: number[];
@@ -55,7 +70,9 @@ const empty = (): TFormState => ({
   priority: "none",
   assignee_ids: [],
   label_ids: [],
-  due_in_days: "",
+  due_preset: "none",
+  due_amount: "",
+  due_unit: "day",
   frequency: "weekly",
   time: "09:00",
   weekdays: [0],
@@ -70,7 +87,9 @@ const fromData = (d: TScheduledIssue): TFormState => ({
   priority: d.priority ?? "none",
   assignee_ids: d.assignee_ids ?? [],
   label_ids: d.label_ids ?? [],
-  due_in_days: d.due_in_days === null || d.due_in_days === undefined ? "" : String(d.due_in_days),
+  due_preset: presetFor(d.due_amount, d.due_unit),
+  due_amount: d.due_amount === null || d.due_amount === undefined ? "" : String(d.due_amount),
+  due_unit: d.due_unit ?? "day",
   frequency: d.frequency,
   time: hhmm(d.time_of_day),
   weekdays: d.weekdays?.length ? d.weekdays : [0],
@@ -119,6 +138,21 @@ export const ScheduledIssueFormModal = observer(function ScheduledIssueFormModal
       return setError("Escolha ao menos um dia da semana.");
     if (form.frequency === "once" && !form.run_on) return setError("Escolha a data.");
 
+    // prazo: opção da lista, ou quantidade + unidade no personalizado
+    let due_amount: number | null = null;
+    let due_unit: TScheduledIssueDueUnit = "day";
+    if (form.due_preset === "custom") {
+      const n = parseInt(form.due_amount, 10);
+      if (!n || n < 1) return setError("Informe a quantidade do prazo personalizado.");
+      if (n > DUE_LIMITS[form.due_unit]) return setError("Prazo de no máximo 10 anos.");
+      due_amount = n;
+      due_unit = form.due_unit;
+    } else {
+      const preset = DUE_PRESETS.find((p) => p.key === form.due_preset);
+      due_amount = preset?.amount ?? null;
+      due_unit = preset?.unit ?? "day";
+    }
+
     const payload: Partial<TScheduledIssueForm> = {
       name: form.name.trim(),
       description_html: textToHtml(form.description),
@@ -126,7 +160,8 @@ export const ScheduledIssueFormModal = observer(function ScheduledIssueFormModal
       priority: form.priority,
       assignee_ids: form.assignee_ids,
       label_ids: form.label_ids,
-      due_in_days: form.due_in_days === "" ? null : Math.max(0, parseInt(form.due_in_days, 10) || 0),
+      due_amount,
+      due_unit,
       frequency: form.frequency,
       time_of_day: form.time,
       weekdays: form.weekdays,
@@ -208,19 +243,45 @@ export const ScheduledIssueFormModal = observer(function ScheduledIssueFormModal
               />
             </div>
           </div>
-          <label className="flex items-center gap-2 text-body-xs-regular text-secondary">
-            Prazo: vence
-            <input
-              type="number"
-              min={0}
-              max={365}
-              value={form.due_in_days}
-              onChange={(e) => set("due_in_days", e.target.value)}
-              placeholder="—"
-              className="w-16 rounded-sm border-[0.5px] border-strong bg-transparent px-2 py-1 text-primary"
-            />
-            dias depois de criada (vazio = sem prazo)
-          </label>
+          <div className="flex flex-wrap items-center gap-2 text-body-xs-regular text-secondary">
+            <span>Vencimento</span>
+            <select
+              value={form.due_preset}
+              onChange={(e) => set("due_preset", e.target.value as TDuePreset)}
+              className="rounded-sm border-[0.5px] border-strong bg-surface-1 px-2 py-1 text-primary"
+            >
+              {DUE_PRESETS.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            {form.due_preset === "custom" && (
+              <>
+                <input
+                  type="number"
+                  min={1}
+                  max={DUE_LIMITS[form.due_unit]}
+                  value={form.due_amount}
+                  onChange={(e) => set("due_amount", e.target.value)}
+                  placeholder="Qtd."
+                  className="w-20 rounded-sm border-[0.5px] border-strong bg-transparent px-2 py-1 text-primary"
+                />
+                <select
+                  value={form.due_unit}
+                  onChange={(e) => set("due_unit", e.target.value as TScheduledIssueDueUnit)}
+                  className="rounded-sm border-[0.5px] border-strong bg-surface-1 px-2 py-1 text-primary"
+                >
+                  {(Object.keys(DUE_UNIT_LABELS) as TScheduledIssueDueUnit[]).map((u) => (
+                    <option key={u} value={u}>
+                      {DUE_UNIT_LABELS[u][1]}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
+            {form.due_preset !== "none" && <span className="text-tertiary">depois de a tarefa ser criada</span>}
+          </div>
         </div>
 
         {/* ── Quando ── */}

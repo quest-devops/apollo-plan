@@ -16,7 +16,6 @@ pula para a próxima data futura — não recria tudo o que deixou de rodar.
 """
 
 import json
-from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 from celery import shared_task
@@ -29,7 +28,7 @@ from django.utils import timezone
 from plane.app.serializers import IssueCreateSerializer
 from plane.bgtasks.issue_activities_task import issue_activity
 from plane.db.models import Label, ProjectMember, ScheduledIssue, State
-from plane.utils.agendamento import proxima_execucao
+from plane.utils.agendamento import proxima_execucao, somar_prazo
 from plane.utils.exception_logger import log_exception
 
 # por rodada: protege o worker se algo acumular (o resto fica para o minuto seguinte)
@@ -80,10 +79,10 @@ def _dados_do_item(agendamento: ScheduledIssue) -> dict:
     }
     if estado:
         dados["state_id"] = str(estado)
-    if agendamento.due_in_days is not None:
+    if agendamento.due_amount is not None:
         hoje_local = timezone.now().astimezone(ZoneInfo(agendamento.timezone)).date()
         dados["start_date"] = hoje_local.isoformat()
-        dados["target_date"] = (hoje_local + timedelta(days=agendamento.due_in_days)).isoformat()
+        dados["target_date"] = somar_prazo(hoje_local, agendamento.due_amount, agendamento.due_unit).isoformat()
     return dados
 
 

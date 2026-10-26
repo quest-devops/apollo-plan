@@ -6,7 +6,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from plane.db.models import Label, ProjectMember, ScheduledIssue, State
-from plane.utils.agendamento import proxima_execucao
+from plane.utils.agendamento import LIMITE_PRAZO, UNIDADES_PRAZO, proxima_execucao
 from plane.utils.content_validator import validate_html_content
 
 from .base import BaseSerializer
@@ -38,7 +38,8 @@ class ScheduledIssueSerializer(BaseSerializer):
             "priority",
             "assignee_ids",
             "label_ids",
-            "due_in_days",
+            "due_amount",
+            "due_unit",
             "frequency",
             "time_of_day",
             "weekdays",
@@ -124,8 +125,12 @@ class ScheduledIssueSerializer(BaseSerializer):
         data_unica = self._valor(attrs, "run_on") if frequencia == "once" else None
         attrs["weekdays"], attrs["month_day"], attrs["run_on"] = dias_semana, dia_mes, data_unica
 
-        if "due_in_days" in attrs and attrs["due_in_days"] is not None and attrs["due_in_days"] > 365:
-            raise serializers.ValidationError({"due_in_days": "Prazo de no máximo 365 dias."})
+        unidade = self._valor(attrs, "due_unit", "day")
+        quantidade = self._valor(attrs, "due_amount")
+        if unidade not in UNIDADES_PRAZO:
+            raise serializers.ValidationError({"due_unit": "Unidade de prazo inválida."})
+        if quantidade is not None and quantidade > LIMITE_PRAZO[unidade]:
+            raise serializers.ValidationError({"due_amount": "Prazo de no máximo 10 anos."})
 
         fuso = self._valor(attrs, "timezone", "America/Sao_Paulo")
         try:

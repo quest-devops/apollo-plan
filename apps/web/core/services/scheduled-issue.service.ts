@@ -10,6 +10,7 @@ import { APIService } from "@/services/api.service";
 
 // Apollo: tarefas agendadas (backend em apps/api/plane/app/views/scheduled_issue)
 export type TScheduledIssueFrequency = "once" | "daily" | "weekly" | "monthly";
+export type TScheduledIssueDueUnit = "day" | "week" | "month" | "year";
 
 export type TScheduledIssue = {
   id: string;
@@ -20,7 +21,8 @@ export type TScheduledIssue = {
   priority: TIssuePriorities;
   assignee_ids: string[];
   label_ids: string[];
-  due_in_days: number | null;
+  due_amount: number | null; // vazio = sem prazo
+  due_unit: TScheduledIssueDueUnit; // mês/ano = de calendário
   frequency: TScheduledIssueFrequency;
   time_of_day: string; // "HH:MM:SS"
   weekdays: number[]; // 0 = segunda … 6 = domingo
@@ -44,7 +46,8 @@ export type TScheduledIssueForm = Pick<
   | "priority"
   | "assignee_ids"
   | "label_ids"
-  | "due_in_days"
+  | "due_amount"
+  | "due_unit"
   | "frequency"
   | "time_of_day"
   | "weekdays"
