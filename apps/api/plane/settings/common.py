@@ -318,6 +318,7 @@ CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_IMPORTS = (
     # scheduled tasks
     "plane.bgtasks.issue_automation_task",
+    "plane.bgtasks.scheduled_issue_task",  # Apollo: tarefas agendadas
     "plane.bgtasks.exporter_expired_task",
     "plane.bgtasks.file_asset_task",
     "plane.bgtasks.email_notification_task",

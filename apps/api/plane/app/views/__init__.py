@@ -84,6 +84,7 @@ from .workspace.quick_link import QuickLinkViewSet
 from .workspace.sticky import WorkspaceStickyViewSet
 
 from .state.base import StateViewSet, IntakeStateEndpoint
+from .scheduled_issue.base import ScheduledIssueViewSet
 from .view.base import (
     WorkspaceViewViewSet,
     WorkspaceViewIssuesViewSet,

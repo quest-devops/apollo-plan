@@ -97,7 +97,8 @@ export const PROJECT_SETTINGS: Record<TProjectSettingsTabs, TProjectSettingsItem
     key: "automations",
     i18n_label: "project_settings.automations.label",
     href: `/automations`,
-    access: [EUserProjectRoles.ADMIN],
+    // Apollo: membros entram para as tarefas agendadas
+    access: [EUserProjectRoles.ADMIN, EUserProjectRoles.MEMBER],
     highlight: (pathname: string, baseUrl: string) => pathname === `${baseUrl}/automations/`,
   },
 };

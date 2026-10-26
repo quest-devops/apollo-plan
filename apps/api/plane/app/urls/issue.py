@@ -5,6 +5,7 @@
 from django.urls import path
 
 from plane.app.views import (
+    ScheduledIssueViewSet,
     BulkCreateIssueLabelsEndpoint,
     BulkDeleteIssuesEndpoint,
     SubIssuesEndpoint,
@@ -282,5 +283,16 @@ urlpatterns = [
         "workspaces/<str:slug>/work-items/<str:project_identifier>-<str:issue_identifier>/",
         IssueDetailIdentifierEndpoint.as_view(),
         name="issue-detail-identifier",
+    ),
+    ## Apollo: tarefas agendadas
+    path(
+        "workspaces/<str:slug>/projects/<uuid:project_id>/scheduled-issues/",
+        ScheduledIssueViewSet.as_view({"get": "list", "post": "create"}),
+        name="project-scheduled-issues",
+    ),
+    path(
+        "workspaces/<str:slug>/projects/<uuid:project_id>/scheduled-issues/<uuid:pk>/",
+        ScheduledIssueViewSet.as_view({"patch": "partial_update", "delete": "destroy"}),
+        name="project-scheduled-issue",
     ),
 ]

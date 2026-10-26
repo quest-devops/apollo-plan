@@ -28,6 +28,11 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 
 app.conf.beat_schedule = {
     # Intra day recurring jobs
+    # Apollo: tarefas agendadas (bgtasks/scheduled_issue_task.py)
+    "check-every-minute-to-create-scheduled-issues": {
+        "task": "plane.bgtasks.scheduled_issue_task.create_scheduled_issues",
+        "schedule": crontab(minute="*"),  # Every minute
+    },
     "check-every-five-minutes-to-send-email-notifications": {
         "task": "plane.bgtasks.email_notification_task.stack_email_notification",
         "schedule": crontab(minute="*/5"),  # Every 5 minutes

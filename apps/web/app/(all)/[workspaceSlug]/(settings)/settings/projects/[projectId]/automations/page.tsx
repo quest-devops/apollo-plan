@@ -35,6 +35,12 @@ function AutomationSettingsPage({ params }: Route.ComponentProps) {
 
   // derived values
   const canPerformProjectAdminActions = allowPermissions([EUserPermissions.ADMIN], EUserPermissionsLevel.PROJECT);
+  // Apollo: membros também entram — para as tarefas agendadas; os dois
+  // interruptores nativos continuam desabilitados para quem não é admin
+  const canViewAutomations = allowPermissions(
+    [EUserPermissions.ADMIN, EUserPermissions.MEMBER],
+    EUserPermissionsLevel.PROJECT
+  );
 
   const handleChange = async (formData: Partial<IProject>) => {
     if (!projectDetails) return;
@@ -53,7 +59,7 @@ function AutomationSettingsPage({ params }: Route.ComponentProps) {
   // derived values
   const pageTitle = projectDetails?.name ? `${projectDetails?.name} - Automations` : undefined;
 
-  if (workspaceUserInfo && !canPerformProjectAdminActions) {
+  if (workspaceUserInfo && !canViewAutomations) {
     return <NotAuthorizedView section="settings" isProjectView className="h-auto" />;
   }
 
